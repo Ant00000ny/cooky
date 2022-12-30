@@ -3,6 +3,7 @@ package com.mikaa404.browser;
 import com.mikaa404.cookie.ChromeCookie;
 import com.mikaa404.cookie.Cookie;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +17,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class ChromeBrowser implements Browser {
-    private static final Path tmpDir = Paths.get(System.getProperty("user.dir"), "tmp");
+    private static final Path TEMP_FILE_PATH = Paths.get(SystemUtils.USER_DIR, "Cookies.sqlite.tmp");
+    
     @Override
     public String getBrowserName() {
         return "Chrome";
@@ -31,7 +33,8 @@ public class ChromeBrowser implements Browser {
     }
     
     private List<Path> getCookieFilePaths() {
-        Path cookieStorePath = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "Google", "Chrome");
+        final Path cookieStorePath = Paths.get(SystemUtils.USER_HOME, "Library", "Application Support", "Google", "Chrome");
+        
         try (Stream<Path> pathStream = Files.walk(cookieStorePath)) {
             return pathStream.filter(p -> StringUtils.equals(p.toFile().getName(), "Cookies"))
                            .toList();
@@ -54,14 +57,10 @@ public class ChromeBrowser implements Browser {
              ResultSet resultSet = statement.executeQuery("SELECT * FROM cookies;")) {
             List<Cookie> cookieList = new ArrayList<>();
             while (resultSet.next()) {
-                ChromeCookie chromeCookie = new ChromeCookie(
-                        resultSet.getString("host_key"),
-                        resultSet.getString("name"),
-                        resultSet.getBytes("encrypted_value"),
-                        resultSet.getString("path")
-                );
-                
-                
+                ChromeCookie chromeCookie = new ChromeCookie(resultSet.getString("host_key"),
+                                                             resultSet.getString("name"),
+                                                             resultSet.getBytes("encrypted_value"),
+                                                             resultSet.getString("path"));
                 cookieList.add(chromeCookie);
             }
             return cookieList;
@@ -75,7 +74,7 @@ public class ChromeBrowser implements Browser {
      */
     private Path copyFileToTemp(Path source) {
         try {
-            Path target = Files.copy(source, tmpDir, StandardCopyOption.REPLACE_EXISTING);
+            Path target = Files.copy(source, TEMP_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
             target.toFile().deleteOnExit();
             return target;
         } catch (IOException e) {

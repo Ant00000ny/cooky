@@ -3,6 +3,7 @@ package com.mikaa404.cookie;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -53,12 +54,17 @@ public class ChromeCookie implements Cookie {
     }
     
     private String decryptEncryptedValue(byte[] encryptedValue) {
-        final String password = getMacOsCookiePassword();
-        try {
-            return decrypt(encryptedValue, password);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException |
-                 InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
-            throw new RuntimeException(String.format("Failed to decrypt cookies: %s", e.getMessage()));
+        if (SystemUtils.IS_OS_MAC) {
+            final String password = getMacOsCookiePassword();
+            try {
+                return decrypt(encryptedValue, password);
+            } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException |
+                     InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
+                throw new RuntimeException(String.format("Failed to decrypt cookies: %s", e.getMessage()));
+            }
+        } else {
+            // TODO: support more OS
+            throw new RuntimeException("OS is not supported. ");
         }
     }
     

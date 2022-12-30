@@ -1,6 +1,7 @@
 import com.mikaa404.browser.ChromeBrowser;
 import com.mikaa404.cookie.Cookie;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -23,6 +24,6 @@ public class SimpleTest {
     
     @Test
     public void test1() {
-        System.out.println(System.getProperty("user.dir"));
+        System.out.println(SystemUtils.USER_DIR);
     }
 }
