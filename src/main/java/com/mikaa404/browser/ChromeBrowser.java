@@ -25,7 +25,7 @@ public class ChromeBrowser implements Browser {
     }
     
     @Override
-    public List<Cookie> getCookies() {
+    public List<Cookie> getAllCookies() {
         return getCookieFilePaths().stream()
                        .map(this::readFromCookieFile)
                        .flatMap(Collection::stream)
@@ -44,8 +44,8 @@ public class ChromeBrowser implements Browser {
     }
     
     private List<Cookie> readFromCookieFile(Path cookieFile) {
-        final String datasourceUrl = String.format("jdbc:sqlite:%s", copyFileToTemp(cookieFile));
-        
+        Path targetPath = copyFileToTemp(cookieFile);
+        final String datasourceUrl = String.format("jdbc:sqlite:%s", targetPath);
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
@@ -63,6 +63,11 @@ public class ChromeBrowser implements Browser {
                                                              resultSet.getString("path"));
                 cookieList.add(chromeCookie);
             }
+            
+            if (!targetPath.toFile().delete()) {
+                throw new RuntimeException(String.format("Failed to delete copy of Cookie file (%s)", targetPath));
+            }
+            
             return cookieList;
         } catch (SQLException e) {
             throw new RuntimeException("Failed while execute SQL operations. ");

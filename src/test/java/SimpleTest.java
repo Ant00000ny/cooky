@@ -13,11 +13,12 @@ public class SimpleTest {
     @Test
     public void test() {
         List<Cookie> cookieList = Optional.of(new ChromeBrowser())
-                                          .map(ChromeBrowser::getCookies)
+                                          .map(ChromeBrowser::getAllCookies)
                                           .orElseThrow(RuntimeException::new)
                                           .stream()
                                           .toList();
         for (Cookie c : cookieList) {
+            System.out.printf("%s\t%s\t%s\t%s\n", c.getHost(), c.getPath(), c.getName(), c.getValue());
             assertTrue(ObjectUtils.allNotNull(c, c.getHost(), c.getPath(), c.getName(), c.getValue()));
         }
     }

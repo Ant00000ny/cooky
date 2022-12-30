@@ -7,5 +7,5 @@ import java.util.List;
 public interface Browser {
     String getBrowserName();
     
-    List<Cookie> getCookies();
+    List<Cookie> getAllCookies();
 }
