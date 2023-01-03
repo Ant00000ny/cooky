@@ -18,7 +18,7 @@ import java.util.List;
 
 class Main {
     public static void main(String[] args) {
-        List<Cookie> cookieList = new ChromeBrowser().getAllCookies();
+        List<Cookie> cookieList = ChromeBrowser.getInstance().getAllCookies();
         
         // do something with cookies
         for (Cookie c : cookieList) {

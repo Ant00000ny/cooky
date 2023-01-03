@@ -17,7 +17,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ChromeBrowser implements Browser {
-    public ChromeBrowser() {
+    private static ChromeBrowser instance;
+    
+    public static ChromeBrowser getInstance() {
+        if (instance == null) {
+            instance = new ChromeBrowser();
+        }
+        
+        return instance;
+    }
+    
+    private ChromeBrowser() {
         if (SystemUtils.IS_OS_MAC) {
             return;
         } else {

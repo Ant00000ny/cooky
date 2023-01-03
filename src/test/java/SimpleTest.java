@@ -12,9 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class SimpleTest {
     @Test
     public void test() {
-        List<Cookie> cookieList = Optional.of(new ChromeBrowser())
+        List<Cookie> cookieList = Optional.of(ChromeBrowser.getInstance())
                                           .map(ChromeBrowser::getAllCookies)
                                           .orElseThrow(RuntimeException::new);
+        
         for (Cookie c : cookieList) {
             System.out.printf("%s\t%s\t%s\t%s\n", c.getHost(), c.getPath(), c.getName(), c.getValue());
             assertTrue(ObjectUtils.allNotNull(c, c.getHost(), c.getPath(), c.getName(), c.getValue()));
