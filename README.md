@@ -1,4 +1,14 @@
-## Usage
+## Maven Dependency
+
+```xml
+<dependency>
+    <groupId>com.mikaa404</groupId>
+    <artifactId>cooky</artifactId>
+    <version>1.0</version>
+</dependency>
+```
+
+## Example Usage
 
 ```java
 import com.mikaa404.browser.ChromeBrowser;
@@ -17,5 +27,7 @@ class Main {
     }
 }
 ```
+
+## Note
 
 Only supports Chrome on macOS currently. 
