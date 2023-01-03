@@ -14,6 +14,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ChromeBrowser implements Browser {
@@ -30,7 +31,7 @@ public class ChromeBrowser implements Browser {
         return getCookieFilePaths().stream()
                        .map(this::readFromCookieFile)
                        .flatMap(Collection::stream)
-                       .toList();
+                       .collect(Collectors.toList());
     }
     
     /**
@@ -45,7 +46,7 @@ public class ChromeBrowser implements Browser {
         
         try (Stream<Path> pathStream = Files.walk(cookieStorePath)) {
             return pathStream.filter(p -> StringUtils.equals(p.toFile().getName(), "Cookies"))
-                           .toList();
+                           .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed while accessing cookie file: %s", e.getMessage()));
         }

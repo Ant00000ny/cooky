@@ -14,9 +14,7 @@ public class SimpleTest {
     public void test() {
         List<Cookie> cookieList = Optional.of(new ChromeBrowser())
                                           .map(ChromeBrowser::getAllCookies)
-                                          .orElseThrow(RuntimeException::new)
-                                          .stream()
-                                          .toList();
+                                          .orElseThrow(RuntimeException::new);
         for (Cookie c : cookieList) {
             System.out.printf("%s\t%s\t%s\t%s\n", c.getHost(), c.getPath(), c.getName(), c.getValue());
             assertTrue(ObjectUtils.allNotNull(c, c.getHost(), c.getPath(), c.getName(), c.getValue()));
