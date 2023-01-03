@@ -26,6 +26,7 @@ public class ChromeBrowser implements Browser {
     
     @Override
     public List<Cookie> getAllCookies() {
+        // TODO: provide option to get cookies by Chrome user profile, for convenience of multi-profile users
         return getCookieFilePaths().stream()
                        .map(this::readFromCookieFile)
                        .flatMap(Collection::stream)
@@ -84,10 +85,7 @@ public class ChromeBrowser implements Browser {
             }
             
             // manually delete temp cookies file
-            if (!targetPath.toFile().delete()) {
-                throw new RuntimeException(String.format("Failed to delete copy of Cookie file: %s", targetPath));
-            }
-            
+            deleteTempFile(targetPath);
             return cookieList;
         } catch (SQLException e) {
             throw new RuntimeException(String.format("Failed while execute SQL operations: %s", e.getMessage()));
@@ -106,6 +104,12 @@ public class ChromeBrowser implements Browser {
             return Files.copy(source, TEMP_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed copying cookies store file: %s", e.getMessage()));
+        }
+    }
+    
+    private void deleteTempFile(Path targetPath) {
+        if (!targetPath.toFile().delete()) {
+            throw new RuntimeException(String.format("Failed to delete copy of Cookie file: %s", targetPath));
         }
     }
 }
