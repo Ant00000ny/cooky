@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,11 +21,9 @@ public class ChromeBrowser implements Browser {
         if (SystemUtils.IS_OS_MAC) {
             return;
         } else {
-            throw new RuntimeException(String.format("OS %s %s is not supported. ", SystemUtils.OS_NAME, SystemUtils.OS_VERSION));
+            throw new RuntimeException(String.format("OS %s is not supported. ", SystemUtils.OS_NAME));
         }
     }
-    
-    private static final Path TEMP_FILE_PATH = Paths.get(SystemUtils.USER_DIR, "Cookies.sqlite.tmp");
     
     @Override
     public String getBrowserName() {
@@ -103,15 +100,24 @@ public class ChromeBrowser implements Browser {
     }
     
     /**
-     * In order to avoid sqlite database lock.
+     * Copy the `Cookie` file in Chrome profile to tmp folder, in order to avoid sqlite database lock.
+     * <p>
+     * e.g. File located in {@code /Users/username/Library/Application Support/Google/Chrome/Profile 1/Cookies} will be
+     * copied to {@code /path/to/project/Chrome_Profile 1_Cookies}
      * <p>
      * Note: Temp file is supposed to be deleted after cookies processing.
      *
-     * @return path of copy of `Cookies` file.
+     * @return path of copy of the `Cookie` file.
      */
     private Path copyFileToTemp(Path source) {
+        final String tmpFileName = String.join("_",
+                                               source.getParent().getParent().getFileName().toString(),
+                                               source.getParent().getFileName().toString(),
+                                               source.getFileName().toString());
+        final Path tmpFilePath = Paths.get(SystemUtils.USER_DIR, tmpFileName);
+        
         try {
-            return Files.copy(source, TEMP_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
+            return Files.copy(source, tmpFilePath);
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed copying cookies store file: %s", e.getMessage()));
         }

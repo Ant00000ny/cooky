@@ -68,6 +68,7 @@ public class ChromeCookie implements Cookie {
                 return decrypt(encryptedValue, password);
             } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException |
                      InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
+//                String stackTrace = ExceptionUtils.getStackTrace(e);
                 throw new RuntimeException(String.format("Failed to decrypt cookies: %s", e.getMessage()));
             }
         } else {
@@ -116,7 +117,7 @@ public class ChromeCookie implements Cookie {
                                                .getInputStream()) {
             macOsCookiePassword = IOUtils.readLines(inputStream, StandardCharsets.UTF_8)
                                           .stream()
-                                          // TODO: find a better way to identify fail message
+                                          // TODO: find a better way to identify fail message (subprocess exit value?)
                                           .filter(s -> !StringUtils.contains(s, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain."))
                                           .findFirst()
                                           .orElseThrow(() -> new RuntimeException("Failed to read keyring password. "));
