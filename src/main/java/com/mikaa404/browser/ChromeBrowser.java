@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 public class ChromeBrowser implements Browser {
     private static ChromeBrowser instance;
+    private static Path TEMP_FILE_FOLDER;
     
     public static ChromeBrowser getInstance() {
         if (instance != null) {
@@ -28,7 +29,7 @@ public class ChromeBrowser implements Browser {
             if (instance != null) {
                 return instance;
             }
-    
+            
             instance = new ChromeBrowser();
             return instance;
         }
@@ -36,6 +37,7 @@ public class ChromeBrowser implements Browser {
     
     private ChromeBrowser() {
         if (SystemUtils.IS_OS_MAC) {
+            TEMP_FILE_FOLDER = Paths.get("/", "tmp");
             return;
         } else {
             throw new RuntimeException(String.format("OS %s is not supported. ", SystemUtils.OS_NAME));
@@ -116,10 +118,10 @@ public class ChromeBrowser implements Browser {
     }
     
     /**
-     * Copy the `Cookie` file in Chrome profile to tmp folder, in order to avoid sqlite database lock.
-     * <p>
-     * e.g. File located in {@code /Users/username/Library/Application Support/Google/Chrome/Profile 1/Cookies} will be
-     * copied to {@code /path/to/project/Chrome_Profile 1_Cookies}
+     * Copy the `Cookie` file in Chrome profile to tmp folder, in order to avoid sqlite database lock. Store path of
+     * copied file depends on the running OS, for example, on macOS, file located in
+     * {@code /Users/my_username/Library/Application Support/Google/Chrome/Profile 1/Cookies} will be copied to
+     * {@code /tmp/Chrome_Profile 1_Cookies}
      * <p>
      * Note: Temp file is supposed to be deleted after cookies processing.
      *
@@ -130,7 +132,7 @@ public class ChromeBrowser implements Browser {
                                                source.getParent().getParent().getFileName().toString(),
                                                source.getParent().getFileName().toString(),
                                                source.getFileName().toString());
-        final Path tmpFilePath = Paths.get(SystemUtils.USER_DIR, tmpFileName);
+        final Path tmpFilePath = TEMP_FILE_FOLDER.resolve(tmpFileName);
         
         try {
             return Files.copy(source, tmpFilePath);
