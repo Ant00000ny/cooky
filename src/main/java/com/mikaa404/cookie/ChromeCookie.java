@@ -72,6 +72,7 @@ public class ChromeCookie implements Cookie {
             }
         } else {
             // TODO: support more OS
+            // TODO: refactor project with interface "CookieDecrypter" and impl classes like "MacOsCookieDecrypter", then use as "ChromeBrowser.decrypt(MacOsCookieDecrypter)"
             throw new RuntimeException("OS is not supported. ");
         }
     }

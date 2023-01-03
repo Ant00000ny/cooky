@@ -18,6 +18,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ChromeBrowser implements Browser {
+    public ChromeBrowser() {
+        if (SystemUtils.IS_OS_MAC) {
+            return;
+        } else {
+            throw new RuntimeException(String.format("OS %s %s is not supported. ", SystemUtils.OS_NAME, SystemUtils.OS_VERSION));
+        }
+    }
+    
     private static final Path TEMP_FILE_PATH = Paths.get(SystemUtils.USER_DIR, "Cookies.sqlite.tmp");
     
     @Override
@@ -28,6 +36,7 @@ public class ChromeBrowser implements Browser {
     @Override
     public List<Cookie> getAllCookies() {
         // TODO: provide option to get cookies by Chrome user profile, for convenience of multi-profile users
+        // TODO: multi-thread may be better?
         return getCookieFilePaths().stream()
                        .map(this::readFromCookieFile)
                        .flatMap(Collection::stream)
