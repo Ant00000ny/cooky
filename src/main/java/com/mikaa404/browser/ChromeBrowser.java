@@ -43,8 +43,7 @@ public class ChromeBrowser implements Browser {
     @Override
     public List<Cookie> getAllCookies() {
         // TODO: provide option to get cookies by Chrome user profile, for convenience of multi-profile users
-        // TODO: multi-thread may be better?
-        return getCookieFilePaths().stream()
+        return getCookieFilePaths().parallelStream()
                        .map(this::readFromCookieFile)
                        .flatMap(Collection::stream)
                        .collect(Collectors.toList());

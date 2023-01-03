@@ -29,6 +29,10 @@ public class ChromeCookie implements Cookie {
     public ChromeCookie(String host, String name, byte[] encryptedValue, String path) {
         this.host = host;
         this.name = name;
+        // remove "v10" prefix of encrypted value (see https://stackoverflow.com/a/60423699)
+        if (Arrays.equals(ArrayUtils.subarray(encryptedValue, 0, 3), "v10".getBytes())) {
+            encryptedValue = ArrayUtils.subarray(encryptedValue, 3, encryptedValue.length);
+        }
         this.value = decryptEncryptedValue(encryptedValue);
         this.path = path;
     }
@@ -84,20 +88,15 @@ public class ChromeCookie implements Cookie {
         final int keyLength = 128;
         final byte[] iv = new byte[16];
         Arrays.fill(iv, (byte) ' ');
-        
-        
+    
         byte[] aesKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
                                 .generateSecret(new PBEKeySpec(password.toCharArray(), salt, iterationCount, keyLength))
                                 .getEncoded();
-        
+    
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE,
                     new SecretKeySpec(aesKey, "AES"),
                     new IvParameterSpec(iv));
-        // remove "v10" prefix (see https://stackoverflow.com/a/60423699)
-        if (Arrays.equals(ArrayUtils.subarray(encryptedValue, 0, 3), "v10".getBytes())) {
-            encryptedValue = ArrayUtils.subarray(encryptedValue, 3, encryptedValue.length);
-        }
         
         return new String(cipher.doFinal(encryptedValue));
     }
@@ -106,7 +105,7 @@ public class ChromeCookie implements Cookie {
      * Retrieve the key to decrypt the {@code encrypted_value} column in sqlite cookie file. This method may prompt to
      * ask for user password.
      */
-    private String getMacOsCookiePassword() {
+    private synchronized String getMacOsCookiePassword() {
         if (macOsCookiePassword != null) {
             return macOsCookiePassword;
         }
