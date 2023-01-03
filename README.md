@@ -4,7 +4,7 @@
 <dependency>
     <groupId>com.mikaa404</groupId>
     <artifactId>cooky</artifactId>
-    <version>1.0</version>
+    <version>[1.0,)</version>
 </dependency>
 ```
 
