@@ -67,7 +67,7 @@ public class ChromeBrowser implements Browser {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Failed to load sqlite driver class. ");
+            throw new RuntimeException(String.format("Failed to load sqlite driver class: %s", e.getMessage()));
         }
         
         try (Connection connection = DriverManager.getConnection(datasourceUrl);
@@ -85,12 +85,12 @@ public class ChromeBrowser implements Browser {
             
             // manually delete temp cookies file
             if (!targetPath.toFile().delete()) {
-                throw new RuntimeException(String.format("Failed to delete copy of Cookie file (%s)", targetPath));
+                throw new RuntimeException(String.format("Failed to delete copy of Cookie file: %s", targetPath));
             }
             
             return cookieList;
         } catch (SQLException e) {
-            throw new RuntimeException("Failed while execute SQL operations. ");
+            throw new RuntimeException(String.format("Failed while execute SQL operations: %s", e.getMessage()));
         }
     }
     
@@ -105,7 +105,7 @@ public class ChromeBrowser implements Browser {
         try {
             return Files.copy(source, TEMP_FILE_PATH, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException("Failed copying cookies store file. ");
+            throw new RuntimeException(String.format("Failed copying cookies store file: %s", e.getMessage()));
         }
     }
 }

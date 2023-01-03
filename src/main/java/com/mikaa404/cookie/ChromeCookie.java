@@ -54,8 +54,9 @@ public class ChromeCookie implements Cookie {
     }
     
     /**
-     * Value of cookies stored in Chrome is encrypted with AES. This method will try to access system keyring and may
-     * prompt for user password to get AES key then decrypt cookies values.
+     * Since Chrome version v80, value of cookies stored in Chrome is encrypted with AES. This method will try to access
+     * system keyring and may prompt for user login password to get the PBE password to get AES key then decrypt cookies
+     * values.
      *
      * @param encryptedValue encrypted value stored in Chrome `Cookies` file.
      * @return decrypted value.
@@ -91,7 +92,7 @@ public class ChromeCookie implements Cookie {
         cipher.init(Cipher.DECRYPT_MODE,
                     new SecretKeySpec(aesKey, "AES"),
                     new IvParameterSpec(iv));
-        // remove "v10" prefix (since Chrome version v80, see https://stackoverflow.com/a/60423699)
+        // remove "v10" prefix (see https://stackoverflow.com/a/60423699)
         if (StringUtils.startsWith(new String(encryptedValue), "v10")) {
             encryptedValue = ArrayUtils.subarray(encryptedValue, 3, encryptedValue.length);
         }
