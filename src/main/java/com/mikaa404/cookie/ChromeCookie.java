@@ -53,6 +53,13 @@ public class ChromeCookie implements Cookie {
         return path;
     }
     
+    /**
+     * Value of cookies stored in Chrome is encrypted with AES. This method will try to access system keyring and may
+     * prompt for user password to get AES key then decrypt cookies values.
+     *
+     * @param encryptedValue encrypted value stored in Chrome `Cookies` file.
+     * @return decrypted value.
+     */
     private String decryptEncryptedValue(byte[] encryptedValue) {
         if (SystemUtils.IS_OS_MAC) {
             final String password = getMacOsCookiePassword();
@@ -93,7 +100,8 @@ public class ChromeCookie implements Cookie {
     }
     
     /**
-     * Retrieve the key to decrypt the {@code encrypted_value} column in sqlite cookie file. This method may prompt to ask for user password.
+     * Retrieve the key to decrypt the {@code encrypted_value} column in sqlite cookie file. This method may prompt to
+     * ask for user password.
      */
     private String getMacOsCookiePassword() {
         if (macOsCookiePassword != null) {
@@ -101,10 +109,12 @@ public class ChromeCookie implements Cookie {
         }
         
         try (InputStream inputStream = Runtime.getRuntime()
+                                               // use exec(String[]) rather than exec(String). The former supports spaces in args while the latter not.
                                                .exec(new String[]{"security", "find-generic-password", "-w", "-s", "Chrome Safe Storage"})
                                                .getInputStream()) {
             macOsCookiePassword = IOUtils.readLines(inputStream, StandardCharsets.UTF_8)
                                           .stream()
+                                          // TODO: find a better way to identify fail message
                                           .filter(s -> !StringUtils.contains(s, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain."))
                                           .findFirst()
                                           .orElseThrow(() -> new RuntimeException("Failed to read keyring password. "));
