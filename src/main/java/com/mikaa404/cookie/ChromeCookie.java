@@ -88,11 +88,11 @@ public class ChromeCookie implements Cookie {
         final int keyLength = 128;
         final byte[] iv = new byte[16];
         Arrays.fill(iv, (byte) ' ');
-    
+        
         byte[] aesKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
                                 .generateSecret(new PBEKeySpec(password.toCharArray(), salt, iterationCount, keyLength))
                                 .getEncoded();
-    
+        
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE,
                     new SecretKeySpec(aesKey, "AES"),
@@ -105,24 +105,30 @@ public class ChromeCookie implements Cookie {
      * Retrieve the key to decrypt the {@code encrypted_value} column in sqlite cookie file. This method may prompt to
      * ask for user password.
      */
-    private synchronized String getMacOsCookiePassword() {
+    private String getMacOsCookiePassword() {
         if (macOsCookiePassword != null) {
             return macOsCookiePassword;
         }
         
-        try (InputStream inputStream = Runtime.getRuntime()
-                                               // use exec(String[]) rather than exec(String). The former supports spaces in args while the latter not.
-                                               .exec(new String[]{"security", "find-generic-password", "-w", "-s", "Chrome Safe Storage"})
-                                               .getInputStream()) {
-            macOsCookiePassword = IOUtils.readLines(inputStream, StandardCharsets.UTF_8)
-                                          .stream()
-                                          // TODO: find a better way to identify fail message (subprocess exit value?)
-                                          .filter(s -> !StringUtils.contains(s, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain."))
-                                          .findFirst()
-                                          .orElseThrow(() -> new RuntimeException("Failed to read keyring password. "));
-            return macOsCookiePassword;
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed while try to get macOS key ring: %s", e.getMessage()));
+        synchronized (ChromeCookie.class) {
+            if (macOsCookiePassword != null) {
+                return macOsCookiePassword;
+            }
+            
+            try (InputStream inputStream = Runtime.getRuntime()
+                                                   // use exec(String[]) rather than exec(String). The former supports spaces in args while the latter not.
+                                                   .exec(new String[]{"security", "find-generic-password", "-w", "-s", "Chrome Safe Storage"})
+                                                   .getInputStream()) {
+                macOsCookiePassword = IOUtils.readLines(inputStream, StandardCharsets.UTF_8)
+                                              .stream()
+                                              // TODO: find a better way to identify fail message (subprocess exit value?)
+                                              .filter(s -> !StringUtils.contains(s, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain."))
+                                              .findFirst()
+                                              .orElseThrow(() -> new RuntimeException("Failed to read keyring password. "));
+                return macOsCookiePassword;
+            } catch (IOException e) {
+                throw new RuntimeException(String.format("Failed while try to get macOS key ring: %s", e.getMessage()));
+            }
         }
     }
 }

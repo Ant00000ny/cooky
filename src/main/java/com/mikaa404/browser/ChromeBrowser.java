@@ -20,11 +20,18 @@ public class ChromeBrowser implements Browser {
     private static ChromeBrowser instance;
     
     public static ChromeBrowser getInstance() {
-        if (instance == null) {
-            instance = new ChromeBrowser();
+        if (instance != null) {
+            return instance;
         }
         
-        return instance;
+        synchronized (ChromeBrowser.class) {
+            if (instance != null) {
+                return instance;
+            }
+    
+            instance = new ChromeBrowser();
+            return instance;
+        }
     }
     
     private ChromeBrowser() {
