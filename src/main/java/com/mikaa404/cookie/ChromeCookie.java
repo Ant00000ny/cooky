@@ -95,7 +95,7 @@ public class ChromeCookie implements Cookie {
                     new SecretKeySpec(aesKey, "AES"),
                     new IvParameterSpec(iv));
         // remove "v10" prefix (see https://stackoverflow.com/a/60423699)
-        if (StringUtils.startsWith(new String(encryptedValue), "v10")) {
+        if (Arrays.equals(ArrayUtils.subarray(encryptedValue, 0, 3), "v10".getBytes())) {
             encryptedValue = ArrayUtils.subarray(encryptedValue, 3, encryptedValue.length);
         }
         
