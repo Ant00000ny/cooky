@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,11 +50,26 @@ public class ChromeBrowser implements Browser {
     
     @Override
     public List<Cookie> getAllCookies() {
-        // TODO: provide option to get cookies by Chrome user profile, for convenience of multi-profile users
-        return getCookieFilePaths().parallelStream()
+        return getCookieFilePaths().stream()
+                       // use cookies in first profile by default
+                       .findFirst()
                        .map(this::readFromCookieFile)
-                       .flatMap(Collection::stream)
-                       .collect(Collectors.toList());
+                       .orElseGet(ArrayList::new);
+    }
+    
+    /**
+     * Get all cookies from a specific profile.
+     *
+     * @param profileName specified profile name
+     * @return a list of cookies stored in that profile name, or empty list if no profile of that name or cookies is
+     * found.
+     */
+    public List<Cookie> getAllCookies(String profileName) {
+        return getCookieFilePaths().stream()
+                       .filter(p -> StringUtils.equals(profileName, p.getParent().getFileName().toString()))
+                       .findFirst()
+                       .map(this::readFromCookieFile)
+                       .orElseGet(ArrayList::new);
     }
     
     /**
