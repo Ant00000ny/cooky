@@ -1,7 +1,7 @@
 package com.mikaa404.cookie;
 
-public interface Cookie {
-    String getHost();
+public interface ICookie {
+    String getHostKey();
     
     String getName();
     

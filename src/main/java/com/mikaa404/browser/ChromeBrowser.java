@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ChromeBrowser implements Browser {
+public class ChromeBrowser implements IBrowser {
     private static ChromeBrowser instance;
     private static Path TEMP_FILE_FOLDER;
     
@@ -49,7 +49,7 @@ public class ChromeBrowser implements Browser {
     }
     
     @Override
-    public List<Cookie> getAllCookies() {
+    public List<ICookie> getAllCookies() {
         return getCookieFilePaths().stream()
                        // use cookies in first profile by default
                        .findFirst()
@@ -64,7 +64,7 @@ public class ChromeBrowser implements Browser {
      * @return a list of cookies stored in that profile name, or empty list if no profile of that name or cookies is
      * found.
      */
-    public List<Cookie> getAllCookies(String profileName) {
+    public List<ICookie> getAllCookies(String profileName) {
         return getCookieFilePaths().stream()
                        .filter(p -> StringUtils.equals(profileName, p.getParent().getFileName().toString()))
                        .findFirst()
@@ -95,9 +95,9 @@ public class ChromeBrowser implements Browser {
      * extract cookies information.
      *
      * @param cookieFile path of `Cookies` file.
-     * @return a list of {@link Cookie} stored in this file.
+     * @return a list of {@link ICookie} stored in this file.
      */
-    private List<Cookie> readFromCookieFile(Path cookieFile) {
+    private List<ICookie> readFromCookieFile(Path cookieFile) {
         Path targetPath = copyFileToTemp(cookieFile);
         final String datasourceUrl = String.format("jdbc:sqlite:%s", targetPath);
         //language=SQL
@@ -113,7 +113,7 @@ public class ChromeBrowser implements Browser {
         try (Connection connection = DriverManager.getConnection(datasourceUrl);
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(queryAllSql)) {
-            List<Cookie> cookieList = new ArrayList<>();
+            List<ICookie> cookieList = new ArrayList<>();
             while (resultSet.next()) {
                 // I think these column is sufficient for now. TODO: extract all cookie info.
                 ChromeCookie chromeCookie = new ChromeCookie(resultSet.getString("host_key"),

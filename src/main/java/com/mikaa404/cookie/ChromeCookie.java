@@ -18,8 +18,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
-public class ChromeCookie implements Cookie {
-    private final String host;
+public class ChromeCookie implements ICookie {
+    private final String hostKey;
     private final String name;
     private final String value;
     private final String path;
