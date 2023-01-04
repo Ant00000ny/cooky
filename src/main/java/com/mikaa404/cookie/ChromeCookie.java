@@ -2,7 +2,6 @@ package com.mikaa404.cookie;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import javax.crypto.*;
@@ -17,6 +16,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class ChromeCookie implements ICookie {
     private final String hostKey;
@@ -217,14 +217,26 @@ public class ChromeCookie implements ICookie {
                 return macOsCookiePassword;
             }
             
-            try (InputStream inputStream = Runtime.getRuntime()
-                                                   // use exec(String[]) rather than exec(String). The former supports spaces in args while the latter not.
-                                                   .exec(new String[]{"security", "find-generic-password", "-w", "-s", "Chrome Safe Storage"})
-                                                   .getInputStream()) {
+            Process process = null;
+            try {
+                process = Runtime.getRuntime()
+                                  // use exec(String[]) rather than exec(String). The former supports spaces in args while the latter not.
+                                  .exec(new String[]{"security", "find-generic-password", "-w", "-s", "Chrome Safe Storage"});
+            } catch (IOException ignored) {
+            }
+            
+            try {
+                process.waitFor(60, TimeUnit.SECONDS);
+            } catch (InterruptedException ignored) {
+            }
+            
+            if (process.exitValue() != 0) {
+                throw new RuntimeException("Failed to read keyring password. ");
+            }
+            
+            try (InputStream inputStream = process.getInputStream()) {
                 macOsCookiePassword = IOUtils.readLines(inputStream, StandardCharsets.UTF_8)
                                               .stream()
-                                              // TODO: find a better way to identify fail message (subprocess exit value?)
-                                              .filter(s -> !StringUtils.contains(s, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain."))
                                               .findFirst()
                                               .orElseThrow(() -> new RuntimeException("Failed to read keyring password. "));
                 return macOsCookiePassword;
