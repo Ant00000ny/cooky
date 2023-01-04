@@ -152,14 +152,14 @@ public class ChromeBrowser implements IBrowser {
     }
     
     /**
-     * Copy the `Cookie` file in Chrome profile to tmp folder, in order to avoid sqlite database lock. Store path of
+     * Copy the `Cookies` file in Chrome profile to tmp folder, in order to avoid sqlite database lock. Store path of
      * copied file depends on the running OS, for example, on macOS, file located in
      * {@code /Users/my_username/Library/Application Support/Google/Chrome/Profile 1/Cookies} will be copied to
-     * {@code /tmp/Chrome_Profile 1_Cookies}
+     * {@code /tmp/cookyTmpStore/Chrome_Profile 1_Cookies}
      * <p>
      * Note: Temp file is supposed to be deleted after cookies processing.
      *
-     * @return path of copy of the `Cookie` file.
+     * @return path of copy of the `Cookies` file.
      */
     private Path copyFileToTemp(Path source) {
         final String tmpFileName = String.join("_",
