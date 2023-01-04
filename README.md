@@ -22,7 +22,7 @@ class Main {
         
         // do something with cookies
         for (Cookie c : cookieList) {
-            System.out.printf("%s - %s - %s - %s\n", c.getHost(), c.getPath(), c.getName(), c.getValue());
+            System.out.printf("%s - %s - %s - %s\n", c.getHostKey(), c.getPath(), c.getName(), c.getValue());
         }
     }
 }
