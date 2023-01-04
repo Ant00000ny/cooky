@@ -39,12 +39,12 @@ public class ChromeCookie implements Cookie {
     
     @Override
     public String getHost() {
-        return host;
+        return this.host;
     }
     
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
     
     @Override
@@ -54,7 +54,7 @@ public class ChromeCookie implements Cookie {
     
     @Override
     public String getPath() {
-        return path;
+        return this.path;
     }
     
     /**
