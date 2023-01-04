@@ -1,7 +1,7 @@
 package com.mikaa404.browser;
 
 import com.mikaa404.cookie.ChromeCookie;
-import com.mikaa404.cookie.Cookie;
+import com.mikaa404.cookie.ICookie;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
@@ -115,11 +115,26 @@ public class ChromeBrowser implements IBrowser {
              ResultSet resultSet = statement.executeQuery(queryAllSql)) {
             List<ICookie> cookieList = new ArrayList<>();
             while (resultSet.next()) {
-                // I think these column is sufficient for now. TODO: extract all cookie info.
-                ChromeCookie chromeCookie = new ChromeCookie(resultSet.getString("host_key"),
-                                                             resultSet.getString("name"),
-                                                             resultSet.getBytes("encrypted_value"),
-                                                             resultSet.getString("path"));
+                ChromeCookie chromeCookie = new ChromeCookie(
+                        resultSet.getString("host_key"),
+                        resultSet.getString("name"),
+                        resultSet.getBytes("encrypted_value"),
+                        resultSet.getString("path"),
+                        resultSet.getLong("creation_utc"),
+                        resultSet.getString("top_frame_site_key"),
+                        resultSet.getLong("expires_utc"),
+                        resultSet.getBoolean("is_secure"),
+                        resultSet.getBoolean("is_http_only"),
+                        resultSet.getLong("last_access_utc"),
+                        resultSet.getBoolean("has_expires"),
+                        resultSet.getBoolean("is_persistent"),
+                        resultSet.getInt("priority"),
+                        resultSet.getInt("same_site"),
+                        resultSet.getInt("source_scheme"),
+                        resultSet.getInt("source_port"),
+                        resultSet.getBoolean("is_same_party"),
+                        resultSet.getLong("last_update_utc")
+                );
                 cookieList.add(chromeCookie);
             }
             

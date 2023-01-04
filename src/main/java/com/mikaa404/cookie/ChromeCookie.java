@@ -23,38 +23,140 @@ public class ChromeCookie implements ICookie {
     private final String name;
     private final String value;
     private final String path;
+    private final long creationUtc;
+    private final String topFrameSiteKey;
+    private final long expiresUtc;
+    private final boolean isSecure;
+    private final boolean isHttpOnly;
+    private final long lastAccessUtc;
+    private final boolean hasExpires;
+    private final boolean isPersistent;
+    private final int priority;
+    private final int sameSite;
+    private final int sourceScheme;
+    private final int sourcePort;
+    private final boolean isSameParty;
+    private final long lastUpdateUtc;
     
     private static String macOsCookiePassword;
     
-    public ChromeCookie(String host, String name, byte[] encryptedValue, String path) {
-        this.host = host;
-        this.name = name;
+    public ChromeCookie(String hostKey,
+                        String name,
+                        byte[] encryptedValue,
+                        String path,
+                        long creationUtc,
+                        String topFrameSiteKey,
+                        long expiresUtc,
+                        boolean isSecure,
+                        boolean isHttpOnly,
+                        long lastAccessUtc,
+                        boolean hasExpires,
+                        boolean isPersistent,
+                        int priority,
+                        int sameSite,
+                        int sourceScheme,
+                        int sourcePort,
+                        boolean isSameParty,
+                        long lastUpdateUtc) {
         // remove "v10" prefix of encrypted value (see https://stackoverflow.com/a/60423699)
         if (Arrays.equals(ArrayUtils.subarray(encryptedValue, 0, 3), "v10".getBytes())) {
             encryptedValue = ArrayUtils.subarray(encryptedValue, 3, encryptedValue.length);
         }
+        
+        this.hostKey = hostKey;
+        this.name = name;
         this.value = decryptEncryptedValue(encryptedValue);
         this.path = path;
+        this.creationUtc = creationUtc;
+        this.topFrameSiteKey = topFrameSiteKey;
+        this.expiresUtc = expiresUtc;
+        this.isSecure = isSecure;
+        this.isHttpOnly = isHttpOnly;
+        this.lastAccessUtc = lastAccessUtc;
+        this.hasExpires = hasExpires;
+        this.isPersistent = isPersistent;
+        this.priority = priority;
+        this.sameSite = sameSite;
+        this.sourceScheme = sourceScheme;
+        this.sourcePort = sourcePort;
+        this.isSameParty = isSameParty;
+        this.lastUpdateUtc = lastUpdateUtc;
     }
     
     @Override
-    public String getHost() {
-        return this.host;
+    public String getHostKey() {
+        return hostKey;
     }
     
     @Override
     public String getName() {
-        return this.name;
+        return name;
     }
     
     @Override
     public String getValue() {
-        return this.value;
+        return value;
     }
     
     @Override
     public String getPath() {
-        return this.path;
+        return path;
+    }
+    
+    public long getCreationUtc() {
+        return creationUtc;
+    }
+    
+    public String getTopFrameSiteKey() {
+        return topFrameSiteKey;
+    }
+    
+    public long getExpiresUtc() {
+        return expiresUtc;
+    }
+    
+    public boolean isSecure() {
+        return isSecure;
+    }
+    
+    public boolean isHttpOnly() {
+        return isHttpOnly;
+    }
+    
+    public long getLastAccessUtc() {
+        return lastAccessUtc;
+    }
+    
+    public boolean isHasExpires() {
+        return hasExpires;
+    }
+    
+    public boolean isPersistent() {
+        return isPersistent;
+    }
+    
+    public int getPriority() {
+        return priority;
+    }
+    
+    public int getSameSite() {
+        return sameSite;
+    }
+    
+    public int getSourceScheme() {
+        return sourceScheme;
+    }
+    
+    public int getSourcePort() {
+        return sourcePort;
+    }
+    
+    public boolean isSameParty() {
+        return isSameParty;
+    }
+    
+    public long getLastUpdateUtc() {
+        return lastUpdateUtc;
     }
     
     /**

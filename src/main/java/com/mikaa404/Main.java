@@ -1,7 +1,7 @@
 package com.mikaa404;
 
 import com.mikaa404.browser.ChromeBrowser;
-import com.mikaa404.cookie.Cookie;
+import com.mikaa404.cookie.ICookie;
 
 import java.util.List;
 
