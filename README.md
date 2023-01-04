@@ -28,6 +28,12 @@ class Main {
 }
 ```
 
+If you have multiple profile configured, you can specify your profile name.
+
+```java
+List<Cookie> cookieList = ChromeBrowser.getInstance().getAllCookies("Profile 1");
+```
+
 ## Note
 
 Only supports Chrome on macOS currently. 
