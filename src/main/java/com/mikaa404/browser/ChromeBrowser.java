@@ -36,7 +36,7 @@ public class ChromeBrowser implements IBrowser {
     
     private ChromeBrowser() {
         if (SystemUtils.IS_OS_MAC) {
-            TEMP_FILE_FOLDER = Paths.get("/", "tmp");
+            TEMP_FILE_FOLDER = Paths.get("/", "tmp", "cookyTmpStore");
             return;
         } else {
             throw new RuntimeException(String.format("OS %s is not supported. ", SystemUtils.OS_NAME));
@@ -50,11 +50,16 @@ public class ChromeBrowser implements IBrowser {
     
     @Override
     public List<ICookie> getAllCookies() {
-        return getCookieFilePaths().stream()
-                       // use cookies in first profile by default
-                       .findFirst()
-                       .map(this::readFromCookieFile)
-                       .orElseGet(ArrayList::new);
+        prepareTempFolder();
+        
+        List<ICookie> CookieList = getCookieFilePaths().stream()
+                                           // use cookies in first profile by default
+                                           .findFirst()
+                                           .map(this::readFromCookieFile)
+                                           .orElseGet(ArrayList::new);
+        
+        deleteTempFolder();
+        return CookieList;
     }
     
     /**
@@ -173,6 +178,27 @@ public class ChromeBrowser implements IBrowser {
     private void deleteTempFile(Path targetPath) {
         if (!targetPath.toFile().delete()) {
             throw new RuntimeException(String.format("Failed to delete copy of Cookie file: %s", targetPath));
+        }
+    }
+    
+    private void prepareTempFolder() {
+        TEMP_FILE_FOLDER.toFile().mkdirs();
+        try (Stream<Path> pathStream = Files.walk(TEMP_FILE_FOLDER)) {
+            List<Path> pathList = pathStream.filter(p -> !p.equals(TEMP_FILE_FOLDER))
+                                          .collect(Collectors.toList());
+            for (Path path : pathList) {
+                Files.delete(path);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to prepare temp store folder: %s", e.getMessage()));
+        }
+    }
+    
+    private void deleteTempFolder() {
+        try {
+            Files.deleteIfExists(TEMP_FILE_FOLDER);
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to delete temp store folder: %s", e.getMessage()));
         }
     }
 }
