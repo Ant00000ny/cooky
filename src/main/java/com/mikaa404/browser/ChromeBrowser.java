@@ -91,7 +91,7 @@ public class ChromeBrowser implements IBrowser {
             return pathStream.filter(p -> StringUtils.equals(p.toFile().getName(), "Cookies"))
                            .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed while accessing cookie file: %s", e.getMessage()));
+            throw new RuntimeException("Failed while accessing cookie file: ", e);
         }
     }
     
@@ -112,7 +112,7 @@ public class ChromeBrowser implements IBrowser {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(String.format("Failed to load sqlite driver class: %s", e.getMessage()));
+            throw new RuntimeException("Failed to load sqlite driver class: ", e);
         }
         
         try (Connection connection = DriverManager.getConnection(datasourceUrl);
@@ -147,7 +147,7 @@ public class ChromeBrowser implements IBrowser {
             deleteTempFile(targetPath);
             return cookieList;
         } catch (SQLException e) {
-            throw new RuntimeException(String.format("Failed while execute SQL operations: %s", e.getMessage()));
+            throw new RuntimeException("Failed while execute SQL operations: ", e);
         }
     }
     
@@ -171,7 +171,7 @@ public class ChromeBrowser implements IBrowser {
         try {
             return Files.copy(source, tmpFilePath);
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed copying cookies store file: %s", e.getMessage()));
+            throw new RuntimeException("Failed copying cookies store file: ", e);
         }
     }
     
@@ -190,7 +190,7 @@ public class ChromeBrowser implements IBrowser {
                 Files.delete(path);
             }
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to prepare temp store folder: %s", e.getMessage()));
+            throw new RuntimeException("Failed to prepare temp store folder: ", e);
         }
     }
     
@@ -198,7 +198,7 @@ public class ChromeBrowser implements IBrowser {
         try {
             Files.deleteIfExists(TEMP_FILE_FOLDER);
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to delete temp store folder: %s", e.getMessage()));
+            throw new RuntimeException("Failed to delete temp store folder: ", e);
         }
     }
 }

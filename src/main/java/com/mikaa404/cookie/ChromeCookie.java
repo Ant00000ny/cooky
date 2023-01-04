@@ -175,7 +175,7 @@ public class ChromeCookie implements ICookie {
             } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException |
                      InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
 //                String stackTrace = ExceptionUtils.getStackTrace(e);
-                throw new RuntimeException(String.format("Failed to decrypt cookies: %s", e.getMessage()));
+                throw new RuntimeException("Failed to decrypt cookies: %s", e);
             }
         } else {
             // TODO: support more OS
@@ -226,13 +226,13 @@ public class ChromeCookie implements ICookie {
             }
             
             try {
-                process.waitFor(60, TimeUnit.SECONDS);
+                boolean exited = process.waitFor(60, TimeUnit.SECONDS);
+                if (!exited || process.exitValue() != 0) {
+                    throw new RuntimeException("Failed to read keyring password. ");
+                }
             } catch (InterruptedException ignored) {
             }
             
-            if (process.exitValue() != 0) {
-                throw new RuntimeException("Failed to read keyring password. ");
-            }
             
             try (InputStream inputStream = process.getInputStream()) {
                 macOsCookiePassword = IOUtils.readLines(inputStream, StandardCharsets.UTF_8)
@@ -241,7 +241,7 @@ public class ChromeCookie implements ICookie {
                                               .orElseThrow(() -> new RuntimeException("Failed to read keyring password. "));
                 return macOsCookiePassword;
             } catch (IOException e) {
-                throw new RuntimeException(String.format("Failed while try to get macOS key ring: %s", e.getMessage()));
+                throw new RuntimeException("Failed while try to get macOS key ring: %s", e);
             }
         }
     }
