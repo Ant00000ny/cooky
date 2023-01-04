@@ -19,6 +19,9 @@ import java.util.List;
 class Main {
     public static void main(String[] args) {
         List<ICookie> cookieList = ChromeBrowser.getInstance().getAllCookies();
+        // This will get cookies stored in first profile. If you have multiple profile configured, you can specify your profile name.
+        List<ICookie> cookieListByProfile = ChromeBrowser.getInstance().getAllCookies("Profile 1");
+        
         
         // do something with cookies
         for (ICookie c : cookieList) {
@@ -28,11 +31,6 @@ class Main {
 }
 ```
 
-If you have multiple profile configured, you can specify your profile name.
-
-```java
-List<Cookie> cookieList = ChromeBrowser.getInstance().getAllCookies("Profile 1");
-```
 
 ## Note
 
