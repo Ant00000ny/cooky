@@ -1,6 +1,7 @@
 ## Maven Dependency
 
 ```xml
+
 <dependency>
     <groupId>com.mikaa404</groupId>
     <artifactId>cooky</artifactId>
@@ -35,7 +36,9 @@ class Main {
 
 1. Download jar from release. (e.g. `cooky-1.1.1.jar`)
 
-2. Run
+2. Make sure java 1.8+ is installed.
+
+3. Run
 
 ```shell
 java -jar cooky-1.1.1.jar
