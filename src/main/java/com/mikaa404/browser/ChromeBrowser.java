@@ -41,6 +41,7 @@ public class ChromeBrowser implements IBrowser {
             TEMP_FILE_FOLDER = Paths.get("/", "tmp", "cookyTmpStore");
             COOKIE_STORE_PATH = Paths.get(SystemUtils.USER_HOME, "Library", "Application Support", "Google", "Chrome");
         } else if (SystemUtils.IS_OS_WINDOWS) {
+            // TODO: find a way like `$(realpath $(dirname ${BASH_SOURCE[0]}))` rather than `user.dir`
             TEMP_FILE_FOLDER = Paths.get(SystemUtils.USER_DIR, "cookyTmpStore");
             COOKIE_STORE_PATH = Paths.get(SystemUtils.USER_HOME, "AppData", "Local", "Google", "Chrome");
         } else {
@@ -77,6 +78,7 @@ public class ChromeBrowser implements IBrowser {
     public List<ICookie> getAllCookies(String profileName) {
         return getCookieFilePaths().stream()
                        .filter(p -> StringUtils.equals(profileName, p.getParent().getFileName().toString()))
+                       // TODO: provide API to let user know which profile will be used first. maybe refactor with impl `Profile` class with `cookies` field in is better?
                        .findFirst()
                        .map(this::readFromCookieFile)
                        .orElseGet(ArrayList::new);
