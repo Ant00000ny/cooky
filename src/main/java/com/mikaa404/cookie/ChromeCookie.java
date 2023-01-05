@@ -168,6 +168,12 @@ public class ChromeCookie implements ICookie {
     
     /**
      * Since Chrome version v80, value of cookies stored in Chrome is encrypted with AES.
+     * <p>
+     * On macOS, This method will try to access system keyring and may prompt for user login password to get the PBE
+     * password to get AES key then decrypt cookies values.
+     * <p>
+     * On Windows, this method will try to access file `Local State` to  retrieve Windows master key then decrypt
+     * cookies values.
      *
      * @param encryptedValue encrypted value stored in Chrome `Cookies` file.
      * @return decrypted value.
@@ -203,10 +209,6 @@ public class ChromeCookie implements ICookie {
         }
     }
     
-    /**
-     * This method will try to access system keyring and may prompt for user login password to get the PBE password to
-     * get AES key then decrypt cookies values.
-     */
     private static String decryptMacOs(byte[] encryptedValue, String password) {
         final byte[] salt = "saltysalt".getBytes();
         final int iterationCount = 1003;
