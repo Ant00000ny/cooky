@@ -34,4 +34,4 @@ class Main {
 
 ## Note
 
-Only supports Chrome on macOS currently. 
+Only supports Chrome on macOS and Windows currently. 
