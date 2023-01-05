@@ -210,7 +210,6 @@ public class ChromeCookie implements ICookie {
                     new SecretKeySpec(windowsMasterKey, "AES"),
                     new GCMParameterSpec(tagLength, nonce));
         
-        // TODO: exception: tag mismatch
         return new String(cipher.doFinal(cipherTextTag));
     }
     
