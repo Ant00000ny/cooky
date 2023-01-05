@@ -201,8 +201,8 @@ public class ChromeCookie implements ICookie {
     }
     
     private String decryptWindows(byte[] encryptedValue, byte[] windowsMasterKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        final byte[] nonce = ArrayUtils.subarray(encryptedValue, 3, 15);
-        final byte[] cipherTextTag = ArrayUtils.subarray(encryptedValue, 15, encryptedValue.length);
+        final byte[] nonce = ArrayUtils.subarray(encryptedValue, 0, 12);
+        final byte[] cipherTextTag = ArrayUtils.subarray(encryptedValue, 12, encryptedValue.length);
         final int tagLength = 128;
         
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
@@ -210,6 +210,7 @@ public class ChromeCookie implements ICookie {
                     new SecretKeySpec(windowsMasterKey, "AES"),
                     new GCMParameterSpec(tagLength, nonce));
         
+        // TODO: exception: tag mismatch
         return new String(cipher.doFinal(cipherTextTag));
     }
     

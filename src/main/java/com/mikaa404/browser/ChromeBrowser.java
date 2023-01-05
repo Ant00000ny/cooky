@@ -180,7 +180,7 @@ public class ChromeBrowser implements IBrowser {
     }
     
     private void deleteTempFile(Path targetPath) {
-        if (!targetPath.toFile().delete()) {
+        if (targetPath.toFile().exists() && !targetPath.toFile().delete()) {
             throw new RuntimeException(String.format("Failed to delete copy of Cookie file: %s", targetPath));
         }
     }
