@@ -60,6 +60,7 @@ public class ChromeBrowser implements IBrowser {
         
         List<ICookie> CookieList = getCookieFilePaths().stream()
                                            // use cookies in first profile by default
+                                           // TODO: provide API to let user know which profile will be used first. maybe refactor with impl `Profile` class with `cookies` field in is better?
                                            .findFirst()
                                            .map(this::readFromCookieFile)
                                            .orElseGet(ArrayList::new);
@@ -78,7 +79,6 @@ public class ChromeBrowser implements IBrowser {
     public List<ICookie> getAllCookies(String profileName) {
         return getCookieFilePaths().stream()
                        .filter(p -> StringUtils.equals(profileName, p.getParent().getFileName().toString()))
-                       // TODO: provide API to let user know which profile will be used first. maybe refactor with impl `Profile` class with `cookies` field in is better?
                        .findFirst()
                        .map(this::readFromCookieFile)
                        .orElseGet(ArrayList::new);
