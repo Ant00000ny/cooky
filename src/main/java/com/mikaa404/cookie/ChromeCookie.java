@@ -177,13 +177,8 @@ public class ChromeCookie implements ICookie {
             final String password = getMacOsCookiePassword();
             return decryptMacOs(encryptedValue, password);
         } else if (SystemUtils.IS_OS_WINDOWS) {
-            try {
-                final byte[] windowsMasterKey = getWindowsMasterKey();
-                return decryptWindows(encryptedValue, windowsMasterKey);
-            } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
-                     NoSuchAlgorithmException | BadPaddingException | InvalidKeyException | IOException e) {
-                throw new RuntimeException("Failed to decrypt cookies. ", e);
-            }
+            final byte[] windowsMasterKey = getWindowsMasterKey();
+            return decryptWindows(encryptedValue, windowsMasterKey);
         } else {
             // TODO: support more OS
             // TODO: refactor project with interface "CookieDecrypter" and impl classes like "MacOsCookieDecrypter", then use as "ChromeBrowser.decrypt(MacOsCookieDecrypter)"
@@ -191,17 +186,21 @@ public class ChromeCookie implements ICookie {
         }
     }
     
-    private String decryptWindows(byte[] encryptedValue, byte[] windowsMasterKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    private String decryptWindows(byte[] encryptedValue, byte[] windowsMasterKey) {
         final byte[] nonce = ArrayUtils.subarray(encryptedValue, 0, 12);
         final byte[] cipherTextTag = ArrayUtils.subarray(encryptedValue, 12, encryptedValue.length);
         final int tagLength = 128;
-        
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        cipher.init(Cipher.DECRYPT_MODE,
-                    new SecretKeySpec(windowsMasterKey, "AES"),
-                    new GCMParameterSpec(tagLength, nonce));
-        
-        return new String(cipher.doFinal(cipherTextTag));
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE,
+                        new SecretKeySpec(windowsMasterKey, "AES"),
+                        new GCMParameterSpec(tagLength, nonce));
+            
+            return new String(cipher.doFinal(cipherTextTag));
+        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
+                 NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+            throw new RuntimeException("Failed to decrypt cookies encrypted value. ", e);
+        }
     }
     
     /**
@@ -277,7 +276,7 @@ public class ChromeCookie implements ICookie {
      * <p>
      * See <a href="https://stackoverflow.com/a/65953409/1631104">https://stackoverflow.com/a/65953409/1631104</a>
      */
-    private byte[] getWindowsMasterKey() throws IOException {
+    private byte[] getWindowsMasterKey() {
         
         if (windowsMasterKey != null) {
             return windowsMasterKey;
@@ -289,11 +288,17 @@ public class ChromeCookie implements ICookie {
             }
             
             final Path localStatePath = Paths.get(SystemUtils.USER_HOME, "AppData", "Local", "Google", "Chrome", "User Data", "Local State");
-            String encryptedMasterKeyWithPrefixBase64 = new ObjectMapper()
-                                                                .readTree(localStatePath.toFile())
-                                                                .get("os_crypt")
-                                                                .get("encrypted_key")
-                                                                .asText();
+            
+            String encryptedMasterKeyWithPrefixBase64;
+            try {
+                encryptedMasterKeyWithPrefixBase64 = new ObjectMapper()
+                                                             .readTree(localStatePath.toFile())
+                                                             .get("os_crypt")
+                                                             .get("encrypted_key")
+                                                             .asText();
+            } catch (IOException e) {
+                throw new RuntimeException("Json parse error. ", e);
+            }
             
             // Remove prefix (DPAPI)
             byte[] encryptedMasterKeyWithPrefix = Base64.getDecoder().decode(encryptedMasterKeyWithPrefixBase64);
