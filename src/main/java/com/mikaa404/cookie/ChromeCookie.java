@@ -167,31 +167,22 @@ public class ChromeCookie implements ICookie {
     }
     
     /**
-     * Since Chrome version v80, value of cookies stored in Chrome is encrypted with AES. This method will try to access
-     * system keyring and may prompt for user login password to get the PBE password to get AES key then decrypt cookies
-     * values.
+     * Since Chrome version v80, value of cookies stored in Chrome is encrypted with AES.
      *
      * @param encryptedValue encrypted value stored in Chrome `Cookies` file.
      * @return decrypted value.
      */
     private String decryptEncryptedValue(byte[] encryptedValue) {
         if (SystemUtils.IS_OS_MAC) {
-            try {
-                final String password = getMacOsCookiePassword();
-                return decryptMacOs(encryptedValue, password);
-            } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException |
-                     InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
-                throw new RuntimeException("Failed to decrypt cookies: %s", e);
-            } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            final String password = getMacOsCookiePassword();
+            return decryptMacOs(encryptedValue, password);
         } else if (SystemUtils.IS_OS_WINDOWS) {
             try {
                 final byte[] windowsMasterKey = getWindowsMasterKey();
                 return decryptWindows(encryptedValue, windowsMasterKey);
             } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
                      NoSuchAlgorithmException | BadPaddingException | InvalidKeyException | IOException e) {
-                throw new RuntimeException("Failed to decrypt cookies: ", e);
+                throw new RuntimeException("Failed to decrypt cookies. ", e);
             }
         } else {
             // TODO: support more OS
@@ -213,30 +204,39 @@ public class ChromeCookie implements ICookie {
         return new String(cipher.doFinal(cipherTextTag));
     }
     
-    private static String decryptMacOs(byte[] encryptedValue, String password) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    /**
+     * This method will try to access system keyring and may prompt for user login password to get the PBE password to
+     * get AES key then decrypt cookies  values.
+     */
+    private static String decryptMacOs(byte[] encryptedValue, String password) {
         final byte[] salt = "saltysalt".getBytes();
         final int iterationCount = 1003;
         final int keyLength = 128;
         final byte[] iv = new byte[16];
         Arrays.fill(iv, (byte) ' ');
         
-        byte[] aesKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
-                                .generateSecret(new PBEKeySpec(password.toCharArray(), salt, iterationCount, keyLength))
-                                .getEncoded();
-        
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE,
-                    new SecretKeySpec(aesKey, "AES"),
-                    new IvParameterSpec(iv));
-        
-        return new String(cipher.doFinal(encryptedValue));
+        try {
+            byte[] aesKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+                                    .generateSecret(new PBEKeySpec(password.toCharArray(), salt, iterationCount, keyLength))
+                                    .getEncoded();
+            
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE,
+                        new SecretKeySpec(aesKey, "AES"),
+                        new IvParameterSpec(iv));
+            
+            return new String(cipher.doFinal(encryptedValue));
+        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
+                 InvalidKeySpecException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+            throw new RuntimeException("Failed to decrypt cookies encrypted value. ", e);
+        }
     }
     
     /**
      * Retrieve the key to decrypt the {@code encrypted_value} column in sqlite cookie file. This method may prompt to
      * ask for user password.
      */
-    private String getMacOsCookiePassword() throws InterruptedException, IOException {
+    private String getMacOsCookiePassword() {
         if (macOsCookiePassword != null) {
             return macOsCookiePassword;
         }
@@ -246,15 +246,19 @@ public class ChromeCookie implements ICookie {
                 return macOsCookiePassword;
             }
             
-            Process process = Runtime.getRuntime()
-                                      // use exec(String[]) rather than exec(String). The former supports spaces in args while the latter not.
-                                      .exec(new String[]{"security", "find-generic-password", "-w", "-s", "Chrome Safe Storage"});
-            
-            boolean exited = process.waitFor(60, TimeUnit.SECONDS);
-            if (!exited || process.exitValue() != 0) {
-                throw new RuntimeException("Failed to read keyring password. ");
+            Process process;
+            try {
+                process = Runtime.getRuntime()
+                                  // use exec(String[]) rather than exec(String). The former supports spaces in args while the latter not.
+                                  .exec(new String[]{"security", "find-generic-password", "-w", "-s", "Chrome Safe Storage"});
+                
+                boolean processExited = process.waitFor(60, TimeUnit.SECONDS);
+                if (!processExited || process.exitValue() != 0) {
+                    throw new RuntimeException("Failed to read keyring password. ");
+                }
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException("Subprocess exited with non-0 value. ", e);
             }
-            
             
             try (InputStream inputStream = process.getInputStream()) {
                 macOsCookiePassword = IOUtils.readLines(inputStream, StandardCharsets.UTF_8)
@@ -269,6 +273,8 @@ public class ChromeCookie implements ICookie {
     }
     
     /**
+     * Retrieve the master key to decrypt cookies encrypted value.
+     * <p>
      * See <a href="https://stackoverflow.com/a/65953409/1631104">https://stackoverflow.com/a/65953409/1631104</a>
      */
     private byte[] getWindowsMasterKey() throws IOException {

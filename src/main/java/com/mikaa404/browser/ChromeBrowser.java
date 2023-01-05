@@ -95,7 +95,7 @@ public class ChromeBrowser implements IBrowser {
             return pathStream.filter(p -> StringUtils.equals(p.toFile().getName(), "Cookies"))
                            .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException("Failed while accessing cookie file: ", e);
+            throw new RuntimeException("Failed while accessing cookie file. ", e);
         }
     }
     
@@ -116,7 +116,7 @@ public class ChromeBrowser implements IBrowser {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Failed to load sqlite driver class: ", e);
+            throw new RuntimeException("Failed to load sqlite driver class. ", e);
         }
         
         List<ICookie> cookieList = new ArrayList<>();
@@ -149,7 +149,7 @@ public class ChromeBrowser implements IBrowser {
             
             // manually delete temp cookies file
         } catch (SQLException e) {
-            throw new RuntimeException("Failed while execute SQL operations: ", e);
+            throw new RuntimeException("Failed while execute SQL operations. ", e);
         }
         deleteTempFile(targetPath);
         return cookieList;
@@ -175,7 +175,7 @@ public class ChromeBrowser implements IBrowser {
         try {
             return Files.copy(source, tmpFilePath);
         } catch (IOException e) {
-            throw new RuntimeException("Failed copying cookies store file: ", e);
+            throw new RuntimeException("Failed copying cookies store file. ", e);
         }
     }
     
@@ -196,7 +196,7 @@ public class ChromeBrowser implements IBrowser {
                 Files.delete(path);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to prepare temp store folder: ", e);
+            throw new RuntimeException("Failed to prepare temp store folder. ", e);
         }
     }
     
@@ -204,7 +204,7 @@ public class ChromeBrowser implements IBrowser {
         try {
             Files.deleteIfExists(TEMP_FILE_FOLDER);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to delete temp store folder: ", e);
+            throw new RuntimeException("Failed to delete temp store folder. ", e);
         }
     }
 }
