@@ -119,10 +119,10 @@ public class ChromeBrowser implements IBrowser {
             throw new RuntimeException("Failed to load sqlite driver class: ", e);
         }
         
+        List<ICookie> cookieList = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(datasourceUrl);
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(queryAllSql)) {
-            List<ICookie> cookieList = new ArrayList<>();
             while (resultSet.next()) {
                 ChromeCookie chromeCookie = new ChromeCookie(
                         resultSet.getString("host_key"),
@@ -148,11 +148,11 @@ public class ChromeBrowser implements IBrowser {
             }
             
             // manually delete temp cookies file
-            deleteTempFile(targetPath);
-            return cookieList;
         } catch (SQLException e) {
             throw new RuntimeException("Failed while execute SQL operations: ", e);
         }
+        deleteTempFile(targetPath);
+        return cookieList;
     }
     
     /**
@@ -180,8 +180,10 @@ public class ChromeBrowser implements IBrowser {
     }
     
     private void deleteTempFile(Path targetPath) {
-        if (targetPath.toFile().exists() && !targetPath.toFile().delete()) {
-            throw new RuntimeException(String.format("Failed to delete copy of Cookie file: %s", targetPath));
+        try {
+            Files.deleteIfExists(targetPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete temp files. ", e);
         }
     }
     
