@@ -205,7 +205,7 @@ public class ChromeCookie implements ICookie {
     
     /**
      * This method will try to access system keyring and may prompt for user login password to get the PBE password to
-     * get AES key then decrypt cookies  values.
+     * get AES key then decrypt cookies values.
      */
     private static String decryptMacOs(byte[] encryptedValue, String password) {
         final byte[] salt = "saltysalt".getBytes();
@@ -266,7 +266,7 @@ public class ChromeCookie implements ICookie {
                                               .orElseThrow(() -> new RuntimeException("Failed to read keyring password. "));
                 return macOsCookiePassword;
             } catch (IOException e) {
-                throw new RuntimeException("Failed while try to get macOS key ring: %s", e);
+                throw new RuntimeException("Failed while try to get macOS key ring. ", e);
             }
         }
     }
