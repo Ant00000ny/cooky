@@ -112,13 +112,6 @@ public class ChromeBrowser implements IBrowser {
         //language=SQL
         final String queryAllSql = "SELECT * FROM cookies;";
         
-        // manually load sqlite class is needed, otherwise connection to sqlite will fail.
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Failed to load sqlite driver class. ", e);
-        }
-        
         List<ICookie> cookieList = new ArrayList<>();
         try (Connection connection = DriverManager.getConnection(datasourceUrl);
              Statement statement = connection.createStatement();
