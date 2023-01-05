@@ -3,7 +3,6 @@ package com.mikaa404.cookie;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jna.platform.win32.Crypt32Util;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import javax.crypto.*;
@@ -66,8 +65,8 @@ public class ChromeCookie implements ICookie {
                         boolean isSameParty,
                         long lastUpdateUtc) {
         // remove "v10" prefix of encrypted value (see https://stackoverflow.com/a/60423699)
-        if (Arrays.equals(ArrayUtils.subarray(encryptedValue, 0, 3), "v10".getBytes())) {
-            encryptedValue = ArrayUtils.subarray(encryptedValue, 3, encryptedValue.length);
+        if (Arrays.equals(Arrays.copyOfRange(encryptedValue, 0, 3), "v10".getBytes())) {
+            encryptedValue = Arrays.copyOfRange(encryptedValue, 3, encryptedValue.length);
         }
         
         this.hostKey = hostKey;
@@ -193,8 +192,8 @@ public class ChromeCookie implements ICookie {
     }
     
     private String decryptWindows(byte[] encryptedValue, byte[] windowsMasterKey) {
-        final byte[] nonce = ArrayUtils.subarray(encryptedValue, 0, 12);
-        final byte[] cipherTextTag = ArrayUtils.subarray(encryptedValue, 12, encryptedValue.length);
+        final byte[] nonce = Arrays.copyOfRange(encryptedValue, 0, 12);
+        final byte[] cipherTextTag = Arrays.copyOfRange(encryptedValue, 12, encryptedValue.length);
         final int tagLength = 128;
         try {
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
