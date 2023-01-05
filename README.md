@@ -31,6 +31,15 @@ class Main {
 }
 ```
 
+## Executable Usage
+
+1. Download jar from release. (e.g. `cooky-1.1.1.jar`)
+
+2. Run
+
+```shell
+java -jar cooky-1.1.1.jar
+```
 
 ## Note
 
