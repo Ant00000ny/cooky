@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 public class ChromeBrowser implements IBrowser {
     private static ChromeBrowser instance;
     private static Path TEMP_FILE_FOLDER;
+    private static Path COOKIE_STORE_PATH;
     
     public static ChromeBrowser getInstance() {
         if (instance != null) {
@@ -35,9 +36,13 @@ public class ChromeBrowser implements IBrowser {
     }
     
     private ChromeBrowser() {
+        // TODO: support more OS
         if (SystemUtils.IS_OS_MAC) {
             TEMP_FILE_FOLDER = Paths.get("/", "tmp", "cookyTmpStore");
-            return;
+            COOKIE_STORE_PATH = Paths.get(SystemUtils.USER_HOME, "Library", "Application Support", "Google", "Chrome");
+        } else if (SystemUtils.IS_OS_WINDOWS) {
+            TEMP_FILE_FOLDER = Paths.get(SystemUtils.USER_DIR, "cookyTmpStore");
+            COOKIE_STORE_PATH = Paths.get(SystemUtils.USER_HOME, "AppData", "Local", "Google", "Chrome");
         } else {
             throw new RuntimeException(String.format("OS %s is not supported. ", SystemUtils.OS_NAME));
         }
@@ -85,9 +90,8 @@ public class ChromeBrowser implements IBrowser {
      * @return a list of `Cookies` file paths.
      */
     private List<Path> getCookieFilePaths() {
-        final Path cookieStorePath = Paths.get(SystemUtils.USER_HOME, "Library", "Application Support", "Google", "Chrome");
         
-        try (Stream<Path> pathStream = Files.walk(cookieStorePath)) {
+        try (Stream<Path> pathStream = Files.walk(COOKIE_STORE_PATH)) {
             return pathStream.filter(p -> StringUtils.equals(p.toFile().getName(), "Cookies"))
                            .collect(Collectors.toList());
         } catch (IOException e) {
@@ -182,7 +186,7 @@ public class ChromeBrowser implements IBrowser {
     }
     
     private void prepareTempFolder() {
-        TEMP_FILE_FOLDER.toFile().mkdirs();
+        boolean ignored = TEMP_FILE_FOLDER.toFile().mkdirs();
         try (Stream<Path> pathStream = Files.walk(TEMP_FILE_FOLDER)) {
             List<Path> pathList = pathStream.filter(p -> !p.equals(TEMP_FILE_FOLDER))
                                           .collect(Collectors.toList());
